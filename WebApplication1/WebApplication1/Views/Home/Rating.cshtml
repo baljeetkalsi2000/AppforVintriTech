@@ -53,7 +53,10 @@
         </div>
         <div class="row">
             <div class="col-md-12">
-                <button type="button" class="btn btn-primary" ng-click="SaveDatainFile()">Save Comment</button>
+                <button type="button" class="btn btn-primary" ng-click="SaveDatainFile()"
+                        ng-disabled=" myForm.emailID.$error.required || myForm.emailID.$error.email
+                        || myForm.rate.$dirty && myForm.rate.$error.pattern  || myForm.rate.$error.required  ||
+                        myForm.comment.$error.required">Save Comment</button>
             </div>
         </div>
         <div class="row">
@@ -206,7 +209,9 @@
                 data: "{ 'ID': '" + ID + "','username': '" + $scope.dataObj.username + "', 'username': '" + $scope.dataObj.username + "', 'rating': '" + $scope.dataObj.rating + "', 'comment': '" + $scope.dataObj.comment + "'}",
                 contentType: "application/json; charset=utf-8",
                 success: function (data) {
-                    if (data == "Success") {
+                    if (data == "Success")
+                    {
+                        $scope.dataObj = { id: "", name: "", description: "", userRatings: "" };
                         $scope.LoadComment();
                     }
                     else {
