@@ -1,0 +1,229 @@
+﻿@{
+    ViewBag.Title = "Rating";
+}
+
+<form ng-app="todos" ng-controller="TodoController" name="myForm">
+    <div style="color: black;">
+
+        <div class="row">
+            <div class="col-md-12  text-center " style="padding-top:10px; padding-bottom:10px;">
+                <span style="color: #0289B5; font-size: 24px; font-weight: bold;"> @ViewBag.Title</span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <label>Beer ID : @ViewBag.BeerID</label>
+            </div>
+        </div>
+        <div class="row">
+
+            <label class="col-md-4">
+                User Name:
+                <input type="email" name="emailID" ng-model="dataObj.username" required ng-trim="false">
+            </label>
+
+            <div class="col-md-4">
+                <span style="color:red" ng-show="myForm.emailID.$error.required">Email required</span>
+                <span style="color:red" class="error" ng-show="myForm.emailID.$error.email">Not Valid Email</span>
+            </div>
+
+        </div>
+        <div class="row">
+
+            <label class="col-md-4">
+                Rating (1-5):
+                <input type="text" name="rate" ng-model="dataObj.rating" ng-pattern="/^[1-5]+$/" required ng-trim="false">
+            </label>
+
+            <div class="col-md-4">
+                <span style="color:Red" ng-show="myForm.rate.$dirty && myForm.rate.$error.pattern">Enter rate between 1-5 </span>
+                <span style="color:Red" ng-show="myForm.rate.$error.required">rate required</span>
+            </div>
+        </div>
+        <div class="row">
+
+            <label class="col-md-4">
+                Comments:
+                <input type="text" name="comment" ng-model=" dataObj.comment" required ng-trim="false">
+            </label>
+            <div class="col-md-4">
+                <span style="color:Red" ng-show="myForm.comment.$error.required">comment required</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <button type="button" class="btn btn-primary" ng-click="SaveDatainFile()">Save Comment</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User Name</th>
+                            <th>User Ratings</th>
+                            <th>Comment</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr ng-repeat="Rate  in RatingList">
+                            <td>{{ Rate.id }}</td>
+                            <td>{{ Rate.name }}</td>
+                            <td>{{ Rate.userRatings }}</td>
+                            <td>{{ Rate.description }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" id="HDBeerID" name="BeerID" value=@ViewBag.BeerID>
+</form>
+
+
+<style type="text/css">
+
+    .table {
+        /*border: 1px solid lightgray;*/
+        color: black;
+        margin-bottom: 10px;
+    }
+
+        .table tr td {
+            color: black;
+            border: 1px solid lightgray;
+        }
+
+        .table th {
+            background-color: lightgray;
+            font-weight: bold;
+            color: #0289B5;
+        }
+
+        .table tr {
+            /*border: 1px solid lightgray;*/
+            /*padding: 5px;*/
+            color: #0289B5;
+        }
+
+    .webGrid {
+        margin: 4px;
+        border-collapse: collapse;
+        background-color: white;
+        width: 1000px;
+    }
+
+    .header {
+        background-color: lightgray;
+        font-weight: bold;
+        color: #FFF;
+    }
+
+    .Footer {
+        background-color: lightgray;
+        font-weight: bold;
+        color: #FFF;
+        text-align: center;
+    }
+
+    .webGrid th {
+        border: 1px solid #B4CFC3;
+        padding: 5px;
+    }
+
+    .webGrid td {
+        border: 1px solid #C0C0C0;
+        padding: 5px;
+        color: #0289B5;
+    }
+
+    .alt {
+        background-color: #E4E9F5;
+        color: #000;
+    }
+
+    .gridHead a:hover {
+        text-decoration: underline;
+    }
+
+
+    .select {
+        background-color: #71857C;
+    }
+
+    .OpportunityIDStyle {
+        width: 50px;
+        text-align: center;
+    }
+
+    .NameStyle {
+        width: 400px;
+    }
+
+    .DateStyle {
+        width: 90px;
+    }
+
+    .UsernameStyle {
+        width: 114px;
+    }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.0/angular.js"></script>
+<script data-require="angular-ui-bootstrap@0.11.0" data-semver="0.11.0" src="http://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.11.0.js"></script>
+
+<script type="text/javascript">
+
+    var todos = angular.module('todos', ['ui.bootstrap']);
+    todos.controller('TodoController', function ($scope, $http) {
+        $scope.error = "";
+        $scope.RatingList = [];
+        $scope.dataObj = { id: "", name: "", description: "", userRatings: "" };
+
+        $scope.LoadComment = function () {
+            var ID = HDBeerID.value;
+
+            $http({
+                method: 'GET',
+                url: "/Home/GetcommentSaveList?ID=" + ID
+            }).then(function (response) {
+                $scope.RatingList = response.data;
+            }, function (reason) { $scope.error = reason; });
+
+        };
+        $scope.LoadComment();
+
+        $scope.SaveDatainFile = function () {
+            var ID = HDBeerID.value;
+            $.ajax({
+                url: "/Home/SaveDatainFile",
+                type: "POST",
+                dataType: "json",
+                data: "{ 'ID': '" + ID + "','username': '" + $scope.dataObj.username + "', 'username': '" + $scope.dataObj.username + "', 'rating': '" + $scope.dataObj.rating + "', 'comment': '" + $scope.dataObj.comment + "'}",
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    if (data == "Success") {
+                        $scope.LoadComment();
+                    }
+                    else {
+                        $scope.error = data;
+                        alert("ERROR:" + data);
+                    }
+                },
+                error: function (response) {
+                    alert("ERROR:" + response.responseText);
+                }
+            });
+
+        }
+
+
+    });
+
+
+</script>
+

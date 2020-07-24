@@ -1,0 +1,204 @@
+﻿@{
+    ViewBag.Title = "Beer List Page";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div style="color: black;" ng-app="todos">
+            <div ng-controller="TodoController">
+
+                <div class="row">
+                    <div class="col-md-12  text-center " style="padding-top:10px; padding-bottom:10px;">
+                        <span style="color: #0289B5; font-size: 24px; font-weight: bold;"> Beer List</span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Beer ID</th>
+                                    <th>Name</th>
+                                    <th>Tagline</th>
+                                    <th>Image</th>
+                                    <th>Rating</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="Beer in BeerList">
+                                    <td>{{ Beer.id }}</td>
+                                    <td>{{ Beer.name }}</td>
+                                    <td>{{ Beer.tagline }}</td>
+                                    <td><img ng-src="{{Beer.image_url}}" width="100" height="100" />
+                                    </td>
+                                    <td> <a ng-href="@Url.Content("~/Home/Rating/"){{Beer.id}}">Rating</a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <pagination boundary-links="true" max-size="4" items-per-page="itemsPerPage" total-items="arraylength" ng-model="currentPage" ng-change="pageChanged()"></pagination>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style type="text/css">
+    .table { /*border: 1px solid lightgray;*/
+        color: black;
+        margin-bottom: 10px;
+    }
+
+        .table tr td {
+            color: black;
+            border: 1px solid lightgray;
+        }
+
+        .table th {
+            background-color: lightgray;
+            font-weight: bold;
+            color: #0289B5;
+        }
+
+        .table tr {
+            /*border: 1px solid lightgray;*/
+            /*padding: 5px;*/
+            color: #0289B5;
+        }
+
+    .webGrid {
+        margin: 4px;
+        border-collapse: collapse;
+        background-color: white;
+        width: 1000px;
+    }
+
+    .header {
+        background-color: lightgray;
+        font-weight: bold;
+        color: #FFF;
+    }
+
+    .Footer {
+        background-color: lightgray;
+        font-weight: bold;
+        color: #FFF;
+        text-align: center;
+    }
+
+    .webGrid th {
+        border: 1px solid #B4CFC3;
+        padding: 5px;
+    }
+
+    .webGrid td {
+        border: 1px solid #C0C0C0;
+        padding: 5px;
+        color: #0289B5;
+    }
+
+    .alt {
+        background-color: #E4E9F5;
+        color: #000;
+    }
+
+    .gridHead a:hover {
+        text-decoration: underline;
+    }
+
+
+    .select {
+        background-color: #71857C;
+    }
+
+    .OpportunityIDStyle {
+        width: 50px;
+        text-align: center;
+    }
+
+    .NameStyle {
+        width: 400px;
+    }
+
+    .DateStyle {
+        width: 90px;
+    }
+
+    .UsernameStyle {
+        width: 114px;
+    }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.0/angular.js"></script>
+<script data-require="angular-ui-bootstrap@0.11.0" data-semver="0.11.0" src="http://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.11.0.js"></script>
+
+<script type="text/javascript">
+
+    var todos = angular.module('todos', ['ui.bootstrap']);
+
+    todos.controller('TodoController', function ($scope, $http) {
+        $scope.BeerList = [];
+        $scope.itemsPerPage = 10;
+        $scope.currentPage = 1;
+        $scope.error = "";
+
+        $scope.MainList = [];
+        $scope.searchlist = [];
+
+        $scope.arraylength = 1;
+
+        $scope.GetBeerList = function ()
+        {
+            $http({
+                method: 'GET',
+                url: "https://api.punkapi.com/v2/beers"
+            }).then(function (response) {
+                $scope.MainList = response.data; 
+                $scope.currentPage = 1;
+                $scope.MainListDisplay();
+
+            }, function (reason) {
+                $scope.error = reason;
+            });
+
+        };
+
+        $scope.MainListDisplay = function () {
+            $scope.arraylength = $scope.MainList.length;
+
+            var begin = (($scope.currentPage - 1) * $scope.itemsPerPage);
+            var end = begin + $scope.itemsPerPage;
+            $scope.BeerList = $scope.MainList.slice(begin, end);
+        };
+        $scope.SearchListDisplay = function () {
+            $scope.arraylength = $scope.searchlist.length;
+
+            var begin = (($scope.currentPage - 1) * $scope.itemsPerPage);
+            var end = begin + $scope.itemsPerPage;
+            $scope.BeerList = $scope.searchlist.slice(begin, end);
+        };
+
+        $scope.GetBeerList();
+        $scope.MainListDisplay();
+        $scope.pageChanged = function () {
+            var SearchValue = $scope.SearchTxtvalue;
+
+            if (SearchValue == null || SearchValue == undefined || SearchValue == "") {
+                SearchValue = "";
+            }
+            if (SearchValue == '') {
+                $scope.MainListDisplay();
+            }
+            else {
+                $scope.SearchListDisplay();
+            }
+        };
+
+    });
+
+
+</script>
